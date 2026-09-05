@@ -3,7 +3,6 @@ Command Line Interface for Verifiable Delay Function Vdf.
 """
 import argparse
 import csv
-import json
 import sys
 from agents.models import SystemTaskPayload
 from agents.supervisor import SystemSupervisor

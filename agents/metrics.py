@@ -1,9 +1,6 @@
 """
 Prometheus Operational Metrics Exporter for verifiable-delay-function-vdf.
 """
-import time
-from typing import Dict, Any
-
 class SystemMetricsCollector:
     def __init__(self):
         self.system_name = "verifiable-delay-function-vdf"

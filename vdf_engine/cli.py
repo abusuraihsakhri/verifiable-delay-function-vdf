@@ -3,7 +3,6 @@ Command-Line Interface for Pietrzak / Wesolowski Verifiable Delay Function (VDF)
 """
 import argparse
 import csv
-import json
 import sys
 from .models import FrontierPayload
 from .agents import VDFCoordinator

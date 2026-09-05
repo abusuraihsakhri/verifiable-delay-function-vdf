@@ -3,10 +3,8 @@ Enrichment Feature Implementation for verifiable-delay-function-vdf.
 Generated based on domain-specific requirements in specifications.
 """
 from dataclasses import dataclass, field
-from typing import Dict, Any, List, Optional, Tuple
+from typing import Dict, Any, List, Optional
 import datetime
-import math
-import json
 
 # =============================================================================
 # 1. PERFORMANCE BENCHMARKING SUITE WITH OPERATION COUNTS AND TIMING
@@ -420,8 +418,8 @@ class VerifiabledelayfunctionvdfEnrichmentSuite:
         self.vdfscalabilityanalyz = VdfScalabilityAnalyzerSequentialTimeVsProofSizeEngine()
         self.formalsecurityproofd = FormalSecurityProofDocumentationSequentialSquaringAssumptionEngine()
         self.nistcompliancecertif = NistComplianceCertificationChecklistWithTestVectorValidationEngine()
-        self.additionalenhancemen = AdditionalEnhancementBlockchainVdfSimulatorEngine()
-        self.additionalenhancemen = AdditionalEnhancementParallelVerificationOptimizerEngine()
+        self.blockchainvdfsimul = AdditionalEnhancementBlockchainVdfSimulatorEngine()
+        self.parallelverificatio = AdditionalEnhancementParallelVerificationOptimizerEngine()
 
     def execute_all(self, primary_val: float = 1.5, secondary_val: float = 0.5) -> Dict[str, Any]:
         results = {}
@@ -431,8 +429,8 @@ class VerifiabledelayfunctionvdfEnrichmentSuite:
         results["VdfScalabilityAnalyzerSequentialTimeVsProofSizeEngine"] = self.vdfscalabilityanalyz.evaluate(primary_val, secondary_val)
         results["FormalSecurityProofDocumentationSequentialSquaringAssumptionEngine"] = self.formalsecurityproofd.evaluate(primary_val, secondary_val)
         results["NistComplianceCertificationChecklistWithTestVectorValidationEngine"] = self.nistcompliancecertif.evaluate(primary_val, secondary_val)
-        results["AdditionalEnhancementBlockchainVdfSimulatorEngine"] = self.additionalenhancemen.evaluate(primary_val, secondary_val)
-        results["AdditionalEnhancementParallelVerificationOptimizerEngine"] = self.additionalenhancemen.evaluate(primary_val, secondary_val)
+        results["AdditionalEnhancementBlockchainVdfSimulatorEngine"] = self.blockchainvdfsimul.evaluate(primary_val, secondary_val)
+        results["AdditionalEnhancementParallelVerificationOptimizerEngine"] = self.parallelverificatio.evaluate(primary_val, secondary_val)
         return results
 
 # Global instance
