@@ -1,182 +1,52 @@
 # Verifiable Delay Function VDF
 
-> **Domain:** Post-Quantum Cryptography & Zero-Knowledge Architecture
-> **Reference Guidelines & Standards:** NIST FIPS 203/204/205, NIST SP 800-90B & ISO/IEC Standards
+Educational Wesolowski verifiable delay function demonstration, with independent legacy threshold-audit CLI and FastAPI services.
 
-<div align="center">
+## Features
 
-[![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
-![Python](https://img.shields.io/badge/Python-3.10%20%7C%203.11%20%7C%203.12-3776AB.svg?logo=python&logoColor=white)
-![FastAPI](https://img.shields.io/badge/FastAPI-0.111-009688.svg?logo=fastapi&logoColor=white)
-![Audit Trail](https://img.shields.io/badge/Audit-HMAC--SHA256_Tamper--Evident-brightgreen.svg)
-![Tests](https://img.shields.io/badge/Tests-35_Passed-brightgreen.svg)
+- **Browser demonstration:** sequential modular squaring with JavaScript BigInt, SHA-256-derived 64-bit prime challenge, quotient proof generation, transcript-bound verification, JSON export, and tampering tests. No Python runtime or server is required.
+- **Python demonstration:** the same proof arithmetic in **vdf_engine/wesolowski.py**, exposed through the installed CLI.
+- **Legacy audit workflows:** rule-based parameter threshold checks, CSV processing, supervisory queries, and two FastAPI audit server variants. These are not cryptographic VDFs.
 
-</div>
+**Cryptographic warning:** This is an educational implementation, **not a production-secure VDF**. The example modulus 1000036000099 = 1000003 × 1000033 has known factors. The proof challenge is only 64 bits; no secure unknown-order group ceremony or independent security audit is provided. Do not use it for blockchain consensus, randomness beacons, lotteries, or other security-sensitive applications. NIST FIPS 203/204/205 are not VDF certifications.
 
----
+## Browser use
 
-## Overview
+Open the static site under **web/** (or serve that directory locally), enter an odd modulus, coprime base, and 1–10,000 squarings, then select **Evaluate and prove**. Verification automatically follows. Edit the JSON transcript and select **Verify transcript** to test modified-proof rejection. Inputs and proof generation remain in your browser; there are no analytics or API calls.
 
-**Verifiable Delay Function VDF** implements Pietrzak / Wesolowski Verifiable Delay Function (VDF) evaluation with a multi-agent consensus architecture. The system provides sequential squaring evaluation, safety boundary enforcement, and protocol conformance checking with tamper-evident audit logging.
+GitHub Pages hosts only the browser version; it does not host the Python servers. Deployment is configured through **.github/workflows/pages.yml** but must be checked in GitHub Pages settings and verified before relying on the public URL.
 
----
+## Python installation and tests
 
-## Architecture
-
-The project consists of two parallel evaluation engines:
-
-### 1. Agents System (`agents/`)
-- **Multi-worker consensus**: InvariantQC, SafetyEscalation, and ProtocolConformance workers
-- **PHI outbound guard**: Prevents sensitive data leakage via regex pattern detection
-- **HMAC-SHA256 audit trail**: Cryptographically chained, tamper-evident logging
-- **FastAPI REST server**: OpenAPI endpoints for audit, chat, and metrics
-
-### 2. VDF Engine (`vdf_engine/`)
-- **Sequential Squaring Worker**: Primary parameter boundary auditor
-- **Wesolowski Proof Prover**: Critical kinetics and security safeguard
-- **Submillisecond Verifier**: Protocol conformance and anomaly triage
-- **VDF Coordinator**: Executive coordinator with execution ledger
-
-### 3. Enrichment Suite (`enrichment.py`)
-- Performance Benchmarking with operation counts and timing
-- Side-Channel Resistance Analysis (constant-time verification)
-- Interoperability Testing against liboqs, pqcrypto, BoringSSL vectors
-- VDF Scalability Analysis (sequential time vs proof size)
-- Formal Security Proof Documentation
-- NIST Compliance Certification Checklist
-- Blockchain VDF Simulator
-- Parallel Verification Optimizer
-
----
-
-## Installation
-
-```bash
-# Clone the repository
+~~~bash
 git clone https://github.com/abusuraihsakhri/verifiable-delay-function-vdf.git
 cd verifiable-delay-function-vdf
+python -m pip install -e '.[server,dev]'
+python -m vdf_engine.cli vdf --modulus 1000036000099 --base 5 --iterations 512
+python -m pytest -q
+node --check web/vdf.js
+node --test tests/test_browser_vdf.cjs
+~~~
 
-# Install dependencies
-pip install fastapi uvicorn pydantic pytest
-```
+The Python proof represents integers as JSON numbers; the browser represents them as decimal strings to avoid JavaScript integer-precision loss.
 
----
+## Legacy audit services
 
-## Usage
-
-### CLI Commands
-
-#### 1. Single Task Evaluation
-```bash
+~~~bash
 python cli.py audit --task-id TASK-001 --target KEY-01 --primary 28.5 --secondary 14.2 --critical --status DISCORDANT
-```
-
-#### 2. Batch CSV Processing
-```bash
 python cli.py batch -i sample.csv -o results.csv
-```
-
-#### 3. Supervisory Chat
-```bash
-python cli.py chat "What is the system status?"
-```
-
-#### 4. Verify Audit Integrity
-```bash
 python cli.py verify-audit
-```
-
-#### 5. Launch REST API Server
-```bash
 python cli.py serve --host 127.0.0.1 --port 8000
-```
+~~~
 
-### VDF Engine CLI
-```bash
-python vdf_engine/cli.py audit --task-id TASK-001 --primary 29.4 --secondary 15.1 --critical --status DISCORDANT
-python vdf_engine/cli.py chat "What standard is applied?"
-```
+The primary FastAPI service **agents.api:app** exposes GET /health, GET /metrics, POST /api/audit, POST /api/chat, and GET /api/audit/logs. The separate **vdf_engine.server** exposes a smaller audit API. Neither provides VDF-proof endpoints.
 
-### REST API Endpoints
+For Docker Compose, set a unique secret at runtime (for example, generate one with Python's secrets.token_hex(32) and export **AUDIT_SECRET_KEY**) and run **docker compose up --build**. Never commit the actual key. Without a configured key the runtime generates an ephemeral key, so audit verification does not persist across restarts.
 
-| Endpoint | Method | Description |
-|:---------|:-------|:------------|
-| `/health` | GET | Service health check |
-| `/metrics` | GET | Operational metrics |
-| `/api/audit` | POST | Submit task for evaluation |
-| `/api/chat` | POST | Query supervisory intelligence |
-| `/api/audit/logs` | GET | Retrieve audit trail with integrity verification |
+**Security and privacy:** the REST API has no authentication and must remain bound to localhost or be protected by an authenticated gateway. The identifier regex filter is heuristic, not a guarantee of de-identification or medical regulatory compliance. Audit logs and supervisor registries are held in process memory; no durable audit storage is implemented. HTTP API data are transmitted to the server, while browser VDF processing is local.
 
-### Simulation
-```bash
-python simulator.py 100
-```
+## Development and compatibility
 
----
+Python >=3.10, Pydantic 2, optional FastAPI/Uvicorn, and pytest; JavaScript BigInt and Web Crypto in current Chromium, Firefox, or Safari. GitHub Actions runs Python tests, JavaScript algorithm checks, and compilation. No Pyodide or server-side Python is used on GitHub Pages.
 
-## Security Features
-
-- **Zero-PHI Outbound Interceptor**: AST and regex inspection blocking SSNs, MRNs, phone numbers, and patient identifiers
-- **Tamper-Evident HMAC-SHA256 Audit Trail**: Chained, cryptographically signed logs with signature verification
-- **Input Validation**: Bounds checking, path traversal prevention, and injection character filtering
-- **Secure Key Generation**: Cryptographically random audit key generation (falls back to `AUDIT_SECRET_KEY` env var)
-
----
-
-## Testing
-
-```bash
-# Run full test suite (35 tests)
-pytest -v
-
-# Run specific test modules
-pytest tests/test_security_and_validation.py -v
-pytest tests/test_enrichment.py -v
-pytest tests/test_vdf_engine.py -v
-```
-
----
-
-## Docker Deployment
-
-```bash
-docker build -t verifiable-delay-function-vdf .
-docker run -p 8000:8000 verifiable-delay-function-vdf
-```
-
----
-
-## Project Structure
-
-```
-verifiable-delay-function-vdf/
-├── agents/                  # Multi-agent consensus system
-│   ├── api.py              # FastAPI REST server
-│   ├── base.py             # Security, PHI guard, audit trail
-│   ├── models.py           # Pydantic data models
-│   ├── supervisor.py       # Orchestrator
-│   ├── workers.py          # Specialized evaluation workers
-│   ├── llm_factory.py      # LLM provider abstraction
-│   ├── learning.py         # Bayesian calibration engine
-│   ├── metrics.py          # Prometheus metrics
-│   └── streamer.py         # WebSocket telemetry
-├── vdf_engine/             # Core VDF evaluation engine
-│   ├── engine.py           # Core algorithmic engine
-│   ├── agents.py           # VDF worker agents
-│   ├── models.py           # Data models
-│   ├── cli.py              # CLI interface
-│   └── server.py           # FastAPI server factory
-├── tests/                  # Test suite
-├── cli.py                  # Main CLI entry point
-├── simulator.py            # High-throughput simulation
-├── enrichment.py           # Enrichment feature suite
-├── pyproject.toml          # Project configuration
-├── Dockerfile              # Container definition
-└── docker-compose.yml      # Compose configuration
-```
-
----
-
-## License
-
-MIT License - see [LICENSE](LICENSE) for details.
+MIT license. See [LICENSE](LICENSE).
