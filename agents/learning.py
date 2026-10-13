@@ -1,7 +1,7 @@
 """
 Autonomous Bayesian Calibration & Active Learning Feedback Engine for verifiable-delay-function-vdf.
 """
-from typing import Dict, List
+from typing import Any, Dict, List
 from pydantic import BaseModel, Field
 
 class WorkerPerformanceMetric(BaseModel):
