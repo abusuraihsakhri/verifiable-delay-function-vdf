@@ -10,6 +10,15 @@ from .agents import VDFCoordinator
 coordinator = VDFCoordinator()
 
 
+def parse_csv_bool(value):
+    normalized = str(value or "").strip().lower()
+    if normalized in ("true", "1", "yes"):
+        return True
+    if normalized in ("false", "0", "no", ""):
+        return False
+    raise ValueError(f"Invalid boolean in CSV: {value!r}")
+
+
 def main(argv=None):
     parser = argparse.ArgumentParser(prog="verifiable-delay-function-vdf", description="Pietrzak / Wesolowski Verifiable Delay Function (VDF) Evaluation Agent")
     subparsers = parser.add_subparsers(dest="command", required=True)
@@ -82,7 +91,7 @@ def main(argv=None):
                 primary_metric=float(r.get("primary_metric", 15.0)),
                 secondary_metric=float(r.get("secondary_metric", 5.0)),
                 status_descriptor=r.get("status_descriptor", "NOMINAL"),
-                is_critical_flag=bool(r.get("is_critical_flag", False)),
+                is_critical_flag=parse_csv_bool(r.get("is_critical_flag", False)),
             )
             dossier = coordinator.process(payload)
             row_dict = dict(r)
