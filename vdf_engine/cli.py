@@ -3,6 +3,7 @@ Command-Line Interface for Pietrzak / Wesolowski Verifiable Delay Function (VDF)
 """
 import argparse
 import csv
+import json
 import sys
 from .models import FrontierPayload
 from .agents import VDFCoordinator
@@ -32,6 +33,12 @@ def main(argv=None):
     p_audit.add_argument("--critical", action="store_true")
     p_audit.add_argument("--status", default="DISCORDANT")
 
+    # Educational VDF
+    p_vdf = subparsers.add_parser("vdf", help="Evaluate and prove educational Wesolowski VDF")
+    p_vdf.add_argument("--modulus", type=int, default=1000036000099)
+    p_vdf.add_argument("--base", type=int, default=5)
+    p_vdf.add_argument("--iterations", type=int, default=512)
+
     # Chat
     p_chat = subparsers.add_parser("chat", help="System configuration query")
     p_chat.add_argument("query", nargs="+")
@@ -47,6 +54,12 @@ def main(argv=None):
     p_serve.add_argument("--port", type=int, default=8000)
 
     args = parser.parse_args(argv)
+
+    if args.command == "vdf":
+        from .wesolowski import prove, verify
+        result = prove(args.modulus, args.base, args.iterations)
+        print(json.dumps({**result, "verified": verify(result)}, indent=2))
+        return 0
 
     if args.command == "audit":
         payload = FrontierPayload(
