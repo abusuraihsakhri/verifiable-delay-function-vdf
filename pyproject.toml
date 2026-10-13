@@ -1,26 +1,32 @@
 [build-system]
-requires = ["setuptools>=61.0"]
+requires = ["setuptools>=69"]
 build-backend = "setuptools.build_meta"
 
 [project]
 name = "verifiable-delay-function-vdf"
-version = "2.0.0"
-description = "Pietrzak / Wesolowski Verifiable Delay Function (VDF) Evaluation Engine"
+version = "2.1.0"
+description = "Educational Wesolowski VDF demonstration and legacy audit toolkit"
 readme = "README.md"
-authors = [{ name = "Dr. Abu Suraih Sakhri", email = "abusuraih@example.com" }]
+authors = [{ name = "Dr. Abu Suraih Sakhri" }]
 license = { text = "MIT" }
 classifiers = [
     "Programming Language :: Python :: 3",
     "License :: OSI Approved :: MIT License",
     "Operating System :: OS Independent",
     "Topic :: Security/Cryptography",
-    "Topic :: Scientific/Engineering :: Artificial Intelligence",
 ]
-requires-python = ">=3.9"
-dependencies = []
+requires-python = ">=3.10"
+dependencies = ["pydantic>=2,<3"]
+
+[project.optional-dependencies]
+server = ["fastapi>=0.110,<1", "uvicorn>=0.29,<1"]
+dev = ["pytest>=8,<10"]
 
 [project.scripts]
 verifiable-delay-function-vdf = "vdf_engine.cli:main"
+
+[tool.setuptools.packages.find]
+include = ["agents*", "vdf_engine*"]
 
 [project.urls]
 Homepage = "https://github.com/abusuraihsakhri/verifiable-delay-function-vdf"

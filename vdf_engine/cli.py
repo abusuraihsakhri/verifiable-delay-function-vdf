@@ -3,11 +3,21 @@ Command-Line Interface for Pietrzak / Wesolowski Verifiable Delay Function (VDF)
 """
 import argparse
 import csv
+import json
 import sys
 from .models import FrontierPayload
 from .agents import VDFCoordinator
 
 coordinator = VDFCoordinator()
+
+
+def parse_csv_bool(value):
+    normalized = str(value or "").strip().lower()
+    if normalized in ("true", "1", "yes"):
+        return True
+    if normalized in ("false", "0", "no", ""):
+        return False
+    raise ValueError(f"Invalid boolean in CSV: {value!r}")
 
 
 def main(argv=None):
@@ -22,6 +32,12 @@ def main(argv=None):
     p_audit.add_argument("--secondary", type=float, default=15.1)
     p_audit.add_argument("--critical", action="store_true")
     p_audit.add_argument("--status", default="DISCORDANT")
+
+    # Educational VDF
+    p_vdf = subparsers.add_parser("vdf", help="Evaluate and prove educational Wesolowski VDF")
+    p_vdf.add_argument("--modulus", type=int, default=1000036000099)
+    p_vdf.add_argument("--base", type=int, default=5)
+    p_vdf.add_argument("--iterations", type=int, default=512)
 
     # Chat
     p_chat = subparsers.add_parser("chat", help="System configuration query")
@@ -38,6 +54,12 @@ def main(argv=None):
     p_serve.add_argument("--port", type=int, default=8000)
 
     args = parser.parse_args(argv)
+
+    if args.command == "vdf":
+        from .wesolowski import prove, verify
+        result = prove(args.modulus, args.base, args.iterations)
+        print(json.dumps({**result, "verified": verify(result)}, indent=2))
+        return 0
 
     if args.command == "audit":
         payload = FrontierPayload(
@@ -82,7 +104,7 @@ def main(argv=None):
                 primary_metric=float(r.get("primary_metric", 15.0)),
                 secondary_metric=float(r.get("secondary_metric", 5.0)),
                 status_descriptor=r.get("status_descriptor", "NOMINAL"),
-                is_critical_flag=bool(r.get("is_critical_flag", False)),
+                is_critical_flag=parse_csv_bool(r.get("is_critical_flag", False)),
             )
             dossier = coordinator.process(payload)
             row_dict = dict(r)
