@@ -4,6 +4,7 @@ Domain: Post-Quantum Cryptography & Hardware Security
 Standard: NIST FIPS 203/204/205 / ISO/IEC 17825 Standards
 """
 import datetime
+import math
 from enum import Enum
 from typing import Dict, Any, List, Optional
 from pydantic import BaseModel, Field, field_validator
@@ -48,7 +49,7 @@ class SystemTaskPayload(BaseModel):
     def validate_metrics(cls, v: float) -> float:
         if not isinstance(v, (int, float)):
             raise ValueError("Metric values must be numeric")
-        if (-1e6) > v or v > 1e6:
+        if not math.isfinite(v) or (-1e6) > v or v > 1e6:
             raise ValueError("Metric value out of acceptable bounds (-1e6 to 1e6)")
         return float(v)
 
